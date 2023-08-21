@@ -1,0 +1,10 @@
+
+{
+    "max_n_peaks":6,
+    "min_peak_height":0.1,
+    "freq_range":[30, 45],
+    "peak_width_limits":[1, 8],
+    "peak_threshold": 2.0, 
+    "aperiodic_mode": "fixed"
+        }
+   

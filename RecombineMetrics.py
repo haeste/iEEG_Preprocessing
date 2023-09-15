@@ -11,9 +11,9 @@ RAW_INFO_DIR = './sample_data/info/'
 IN_RAW_DIR = './sample_data/raw_data/'
 
 # ------------ UPDATE THIS LINE --------------------- #
-OUTPUT_DIR = './output/bandpowers/data/'
+OUTPUT_DIR = './output/bandpowers/data/' # stores metric for each 30s
 # ------------ UPDATE THIS LINE --------------------- #
-OUTPUT_CONCAT_DIR = './output/bandpowers/concat_data/'
+OUTPUT_CONCAT_DIR = './output/bandpowers/concat_data/' # stores metric timeseries
 # ------------ UPDATE THIS LINE --------------------- #
 BAD_CHANNELS_DIR = './output/bandpowers/bad_channels/'
 # ------------ UPDATE THIS LINE --------------------- #

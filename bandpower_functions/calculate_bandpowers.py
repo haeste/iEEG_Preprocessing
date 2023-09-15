@@ -76,7 +76,7 @@ def process_file(subject,mat_file, out_path, bad_ch_path, fs):
 
     # Save band power for the 30s segment
     idd = str(os.path.basename(mat_file).split("raw_")[1].split(".mat")[0])
-    sio.savemat(os.path.join(out_path, "BPall_P{}_{}.mat".format(subject, idd)), bp_computed, do_compression = True)
+    sio.savemat(os.path.join(out_path, "BPall_{}_{}.mat".format(subject, idd)), bp_computed, do_compression = True)
 
     if len(bad_ch_ind) !=0:
         # Save bad channels info for the 30s segment

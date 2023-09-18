@@ -15,15 +15,15 @@ from bandpower_functions import artefactsMetrics
 from bandpower_functions import calculate_bandpowers
 
 
-RAW_INFO_DIR = './sample_data/info/' # pointer to info files
-IN_RAW_DIR = './sample_data/raw_data/' # pointer to raw data 30 second segment files
 
-# ------------ UPDATE THIS LINE --------------------- #
-OUTPUT_DIR = './output/bandpowers/data/' # location to save output data
-# ------------ UPDATE THIS LINE --------------------- #
-BAD_CHANNELS_DIR = './output/bandpowers/bad_channels/' # location to save bad channels
-# ------------ UPDATE THIS LINE --------------------- #
-OUT_PREFIX = 'BPall_' # prefix for output files to indicate the metric that has been calculated
+import json
+f = open('./config.json') 
+config = json.load(f) 
+RAW_INFO_DIR = config['RAW_INFO_DIR'] 
+IN_RAW_DIR = config['IN_RAW_DIR'] 
+OUTPUT_DIR = config['OUTPUT_DIR'] 
+BAD_CHANNELS_DIR = config['BAD_CHANNELS_DIR'] 
+OUT_PREFIX = config['OUT_PREFIX']
 
 # Go and read the raw data
 def process_file(subject,mat_file, out_path, bad_ch_path, fs):

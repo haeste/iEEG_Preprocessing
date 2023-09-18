@@ -7,5 +7,5 @@ You will then need to run RecombineMetrics.py to pull the output files together 
 To use this code to calculate a custom metric:
 1. First write a function to do the calculation. Use the bandpower_functions/calculate_bandpowers.py file as an template. Cleaning code from the bandpower_functions/ directory can be reused. 
 2. Then update the CalculateMetrics.py file to use your new function instead of calculate_bandpowers.bandpower_process.
-3. Create a new output directory for your processed data (copy the structure of the bandpower one). Update CalculateMetrics.py and RecombineMetrics.py to point to this. All lines to update are indicated in the comments.
+3. Update the config file to point to a new OUTPUT_DIR, BAD_CHANNELS_DIR, and have a new OUT_PREFIX to indicate a prefix for the files containing your metric.
 4. Run CalculateMetrics.py, then RecombineMetrics.py. Your output timeseries should be stored in the location specified. 

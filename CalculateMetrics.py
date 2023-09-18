@@ -3,14 +3,17 @@ import multiprocessing
 import time
 import scipy.io as sio
 import os
+import numpy as np
+from bandpower_functions import artefactsMetrics
+
+
 # Import your local function
-# This function should take a subject ID, the location of a 30 second segment 
-# of raw iEEG data (all channels), locations for the output file and bad channels file, 
-# and a sampling frequency. e.g. def process_file(subject,mat_file, out_path, bad_ch_path, fs):
-# Your function should load the 30 second segment, calculate your metric on it, then save this output to file.
-# Look at calculate_bandpowers.py as an example for how to save to file. 
+# This function should take the raw iEEG data (n.o chan x n.o samples) for the 30 second segment, a sample rate, and a list of bad channels (these can be ignored).
+# It should return the computed metric for the 30 second segment, in a dict. 
+# Each key should refer to a variable in your metric (if you metric computes only one thing per 30 seconds, then it will just has one key)
 # ------------ UPDATE THIS LINE --------------------- #
 from bandpower_functions import calculate_bandpowers
+
 
 RAW_INFO_DIR = './sample_data/info/' # pointer to info files
 IN_RAW_DIR = './sample_data/raw_data/' # pointer to raw data 30 second segment files
@@ -19,6 +22,40 @@ IN_RAW_DIR = './sample_data/raw_data/' # pointer to raw data 30 second segment f
 OUTPUT_DIR = './output/bandpowers/data/' # location to save output data
 # ------------ UPDATE THIS LINE --------------------- #
 BAD_CHANNELS_DIR = './output/bandpowers/bad_channels/' # location to save bad channels
+# ------------ UPDATE THIS LINE --------------------- #
+OUT_PREFIX = 'BPall_' # prefix for output files to indicate the metric that has been calculated
+
+# Go and read the raw data
+def process_file(subject,mat_file, out_path, bad_ch_path, fs):
+
+    raw_file = mat_file
+
+    iEEGraw_data = sio.loadmat(raw_file)["EEG"]
+    z_threshold = 3 # if z-score is above 3 or below -3 then the channel is flagged as outlier/bad
+
+    if np.sum(np.isnan(iEEGraw_data)) ==0:
+        # Compute amplitude range for every 30s windows
+        ampl_range_all = artefactsMetrics.amplrange_axis1(iEEGraw_data)
+
+        # standradise each 30s window amplitude ranges across channels (range - mean(range of all channels))/std(range of all channels)
+        ampl_range_all_stand = artefactsMetrics.standardise(ampl_range_all)
+
+        bad_ch_ind = [i for i,v in enumerate(ampl_range_all_stand) if abs(v) > z_threshold]
+
+    else:
+        bad_ch_ind = []
+    # ------------ UPDATE THIS LINE --------------------- # Add your own function
+    metric_computed = calculate_bandpowers.bandpower_process(iEEGraw_data, fs, bad_ch_ind)
+    print("Processing:{}".format(mat_file))
+    # Save band power for the 30s segment
+    idd = str(os.path.basename(mat_file).split("raw_")[1].split(".mat")[0])
+    sio.savemat(os.path.join(out_path, OUT_PREFIX+"{}_{}.mat".format(subject, idd)), metric_computed, do_compression = True)
+
+    if len(bad_ch_ind) !=0:
+        # Save bad channels info for the 30s segment
+        bad_ch_ind_strct = {"BadChan": bad_ch_ind}
+        sio.savemat(os.path.join(bad_ch_path, "BadChan_{}_{}.mat".format(subject, idd)), bad_ch_ind_strct, do_compression = True)
+# ------------ UPDATE THIS LINE --------------------- #
 
 if __name__ == '__main__':
     subject_list = [ 's001', 's002', 's003']
@@ -48,16 +85,16 @@ if __name__ == '__main__':
         
         badCh_path = os.path.join(BAD_CHANNELS_DIR, subject)
         os.makedirs(badCh_path, exist_ok=True)
-        #
+        
+        # This can be uncommented and used for testing - processes in serial, allowing easier debugging.
         # for file in raw_files:
-        #     calculate_bandpowers.process_file(subject, os.path.join(IN_RAW_DIR,subject,file), out_path,badCh_path, fs)
+        #     process_file(subject, os.path.join(IN_RAW_DIR,subject,file), out_path,badCh_path, fs)
    
         pool = multiprocessing.Pool(8)
         start = time.time()
     
         for file in raw_files:
-            # ------------ UPDATE THIS LINE --------------------- # Add your own function
-            pool.apply_async(calculate_bandpowers.process_file, [subject,os.path.join(IN_RAW_DIR,subject,file), out_path,badCh_path, fs])
+            pool.apply_async(process_file, [subject,os.path.join(IN_RAW_DIR,subject,file), out_path,badCh_path, fs])
     
         pool.close()
         pool.join()

@@ -50,35 +50,3 @@ def bandpower_process(EEGdata, fs, badch_indx):
     super_list = list_all["all_bp"]
     return super_list
 
-
-# Go and read the raw data
-def process_file(subject,mat_file, out_path, bad_ch_path, fs):
-
-    raw_file = mat_file
-
-    iEEGraw_data = sio.loadmat(raw_file)["EEG"]
-    z_threshold = 3 # if z-score is above 3 or below -3 then the channel is flagged as outlier/bad
-
-    if np.sum(np.isnan(iEEGraw_data)) ==0:
-        # Compute amplitude range for every 30s windows
-        ampl_range_all = amplrange_axis1(iEEGraw_data)
-
-        # standradise each 30s window amplitude ranges across channels (range - mean(range of all channels))/std(range of all channels)
-        ampl_range_all_stand = standardise(ampl_range_all)
-
-        bad_ch_ind = [i for i,v in enumerate(ampl_range_all_stand) if abs(v) > z_threshold]
-
-    else:
-        bad_ch_ind = []
-
-    bp_computed = bandpower_process(iEEGraw_data, fs, bad_ch_ind)
-    print("Processing:{}".format(mat_file))
-
-    # Save band power for the 30s segment
-    idd = str(os.path.basename(mat_file).split("raw_")[1].split(".mat")[0])
-    sio.savemat(os.path.join(out_path, "BPall_{}_{}.mat".format(subject, idd)), bp_computed, do_compression = True)
-
-    if len(bad_ch_ind) !=0:
-        # Save bad channels info for the 30s segment
-        bad_ch_ind_strct = {"BadChan": bad_ch_ind}
-        sio.savemat(os.path.join(bad_ch_path, "BadChan_{}_{}.mat".format(subject, idd)), bad_ch_ind_strct, do_compression = True)

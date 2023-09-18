@@ -13,11 +13,11 @@ from bandpower_functions import artefactsMetrics
 # Each key should refer to a variable in your metric (if you metric computes only one thing per 30 seconds, then it will just has one key)
 # ------------ UPDATE THIS LINE --------------------- #
 from bandpower_functions import calculate_bandpowers
-
+from fooof_csaba import fooof_computation
 
 
 import json
-f = open('./config.json') 
+f = open('./config_fooof.json') 
 config = json.load(f) 
 RAW_INFO_DIR = config['RAW_INFO_DIR'] 
 IN_RAW_DIR = config['IN_RAW_DIR'] 
@@ -44,8 +44,18 @@ def process_file(subject,mat_file, out_path, bad_ch_path, fs):
 
     else:
         bad_ch_ind = []
-    # ------------ UPDATE THIS LINE --------------------- # Add your own function
-    metric_computed = calculate_bandpowers.bandpower_process(iEEGraw_data, fs, bad_ch_ind)
+        
+    fooof_features = {
+    "max_n_peaks":6,
+    "min_peak_height":0.1,
+    "freq_range":[30, 45],
+    "peak_width_limits":[1, 8],
+    "peak_threshold": 2.0, 
+    "aperiodic_mode": "fixed"
+        }
+    #--------- UPDATE Add your own function --------------------#
+    #metric_computed = calculate_bandpowers.bandpower_process(iEEGraw_data, fs, bad_ch_ind)
+    metric_computed = fooof_computation.run_fooof_calc(iEEGraw_data, fs, fooof_features)
     print("Processing:{}".format(mat_file))
     # Save band power for the 30s segment
     idd = str(os.path.basename(mat_file).split("raw_")[1].split(".mat")[0])
@@ -58,10 +68,10 @@ def process_file(subject,mat_file, out_path, bad_ch_path, fs):
 # ------------ UPDATE THIS LINE --------------------- #
 
 if __name__ == '__main__':
-    subject_list = [ 's001', 's002', 's003']
+    subject_list = [ 's002', 's003']
     
     for subject in subject_list:
-        
+        print(subject)
         
         raw_info = sio.loadmat(os.path.join(RAW_INFO_DIR, "rawInfo_{}.mat".format(subject)))
         
@@ -87,19 +97,19 @@ if __name__ == '__main__':
         os.makedirs(badCh_path, exist_ok=True)
         
         # This can be uncommented and used for testing - processes in serial, allowing easier debugging.
-        # for file in raw_files:
-        #     process_file(subject, os.path.join(IN_RAW_DIR,subject,file), out_path,badCh_path, fs)
-   
-        pool = multiprocessing.Pool(8)
-        start = time.time()
-    
         for file in raw_files:
-            pool.apply_async(process_file, [subject,os.path.join(IN_RAW_DIR,subject,file), out_path,badCh_path, fs])
+            process_file(subject, os.path.join(IN_RAW_DIR,subject,file), out_path,badCh_path, fs)
+   
+        # pool = multiprocessing.Pool(8)
+        # start = time.time()
     
-        pool.close()
-        pool.join()
+        # for file in raw_files:
+        #     pool.apply_async(process_file, [subject,os.path.join(IN_RAW_DIR,subject,file), out_path,badCh_path, fs])
     
-        print("\n job done!!: {}".format(time.time()-start))
+        # pool.close()
+        # pool.join()
+    
+        #print("\n job done!!: {}".format(time.time()-start))
 
 
 

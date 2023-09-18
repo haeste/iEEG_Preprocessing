@@ -1,0 +1,1 @@
+{"RAW_INFO_DIR": "./sample_data/info/", "IN_RAW_DIR": "./sample_data/raw_data/", "OUTPUT_DIR": "./output/bandpowers/bad_channels/", "BAD_CHANNELS_DIR": "./sample_data/info/", "OUT_PREFIX": "BPall_"}

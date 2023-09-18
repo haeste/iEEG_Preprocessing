@@ -1,0 +1,1 @@
+ {"RAW_INFO_DIR": "./sample_data/info/", "IN_RAW_DIR": "./sample_data/raw_data/", "OUTPUT_DIR": "./output/fooof_data/data/", "BAD_CHANNELS_DIR": "./output/fooof_data/bad_channels/", "OUTPUT_CONCAT_DIR": "./output/fooof_data/concat_data/", "OUT_PREFIX": "fooof_"}

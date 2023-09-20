@@ -17,7 +17,8 @@ from fooof_csaba import fooof_computation
 
 
 import json
-f = open('./config_fooof.json') 
+##-----UPDATE---------#
+f = open('./config_bp.json')  # change to config_fooof.json to merge fooof outputs
 config = json.load(f) 
 RAW_INFO_DIR = config['RAW_INFO_DIR'] 
 IN_RAW_DIR = config['IN_RAW_DIR'] 
@@ -94,19 +95,19 @@ if __name__ == '__main__':
         os.makedirs(badCh_path, exist_ok=True)
         
         # This can be uncommented and used for testing - processes in serial, allowing easier debugging.
-        for file in raw_files:
-            process_file(subject, os.path.join(IN_RAW_DIR,subject,file), out_path,badCh_path, fs)
-   
-        # pool = multiprocessing.Pool(8)
-        # start = time.time()
-    
         # for file in raw_files:
-        #     pool.apply_async(process_file, [subject,os.path.join(IN_RAW_DIR,subject,file), out_path,badCh_path, fs])
+        #     process_file(subject, os.path.join(IN_RAW_DIR,subject,file), out_path,badCh_path, fs)
+   
+        pool = multiprocessing.Pool(8)
+        start = time.time()
     
-        # pool.close()
-        # pool.join()
+        for file in raw_files:
+            pool.apply_async(process_file, [subject,os.path.join(IN_RAW_DIR,subject,file), out_path,badCh_path, fs])
     
-        #print("\n job done!!: {}".format(time.time()-start))
+        pool.close()
+        pool.join()
+    
+        print("\n job done!!: {}".format(time.time()-start))
 
 
 

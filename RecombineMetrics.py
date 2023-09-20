@@ -19,7 +19,7 @@ OUTPUT_CONCAT_DIR = config['OUTPUT_CONCAT_DIR']
 
 DATA_TEMP_DIR= './temp_data/'
 
-subject_list = [ 's001', 's002', 's003']
+subject_list = ['s001', 's002', 's003']
 
 
 for subject in subject_list:

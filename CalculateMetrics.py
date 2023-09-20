@@ -43,18 +43,15 @@ def process_file(subject,mat_file, out_path, bad_ch_path, fs):
         bad_ch_ind = [i for i,v in enumerate(ampl_range_all_stand) if abs(v) > z_threshold]
 
     else:
-        bad_ch_ind = []
-        
-    fooof_features = {
-    "max_n_peaks":6,
-    "min_peak_height":0.1,
-    "freq_range":[30, 45],
-    "peak_width_limits":[1, 8],
-    "peak_threshold": 2.0, 
-    "aperiodic_mode": "fixed"
-        }
+       
+       bad_ch_ind = []
+    
     #--------- UPDATE Add your own function --------------------#
     #metric_computed = calculate_bandpowers.bandpower_process(iEEGraw_data, fs, bad_ch_ind)
+    
+    features = open('./fooof_csaba/fooof_features.json') 
+    fooof_features = json.load(features) 
+    
     metric_computed = fooof_computation.run_fooof_calc(iEEGraw_data, fs, fooof_features)
     print("Processing:{}".format(mat_file))
     # Save band power for the 30s segment
@@ -68,7 +65,7 @@ def process_file(subject,mat_file, out_path, bad_ch_path, fs):
 # ------------ UPDATE THIS LINE --------------------- #
 
 if __name__ == '__main__':
-    subject_list = [ 's002', 's003']
+    subject_list = [ 's001','s002', 's003']
     
     for subject in subject_list:
         print(subject)

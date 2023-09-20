@@ -20,17 +20,17 @@ def run_fooof_calc(EEG,fs,fooof_features):
    
     
     # Import the FOOOF object
-    from fooof import FOOOF
+    import fooof
     # Import some internal functions
     from fooof.sim.gen import gen_aperiodic
- 
+    from fooof_csaba import fooof_helper
     #Data org libraries
     import scipy
     import pandas as pd
     import numpy as np
     
     #Preallocation of varables and model
-    fm = FOOOF(fooof_features["peak_width_limits"], fooof_features["max_n_peaks"], 
+    fm = fooof.FOOOF(fooof_features["peak_width_limits"], fooof_features["max_n_peaks"],
                fooof_features["min_peak_height"], fooof_features["peak_threshold"],
                fooof_features["aperiodic_mode"])
     Offsets_channel = []
@@ -51,10 +51,13 @@ def run_fooof_calc(EEG,fs,fooof_features):
         final_fit=[np.nan]*EEG.shape[0]
         print('NaN present.')
     else:
-        #Calcualte pWelch PSD
-        for i in range(EEG.shape[0]):
-            f, Pxx_den=scipy.signal.welch(EEG[i,:], fs=fs,window='hann', nperseg=fs*2, scaling='density', average='mean')
-            fm.fit(f, Pxx_den, fooof_features["freq_range"])
+        downsampled_data, srate_new, winlength_new, nOverlap_new = fooof_helper.fooof_clean_prep(fooof_features,EEG,fs)
+        f, Pxx_den = scipy.signal.welch(downsampled_data, fs=srate_new, nperseg=winlength_new,
+                                noverlap=nOverlap_new, detrend=False)
+        
+        for i in range(Pxx_den.shape[0]):
+            
+            fm.fit(f, Pxx_den[i,:], fooof_features["freq_range"])
             init_ap_fit = gen_aperiodic(fm.freqs, fm._robust_ap_fit(fm.freqs, fm.power_spectrum))
             final_fit.append(fm.fooofed_spectrum_)
             Offsets_channel.append( fm.aperiodic_params_[0])
@@ -70,5 +73,5 @@ def run_fooof_calc(EEG,fs,fooof_features):
         ## Concatonate final fit channels
         final_fit=np.vstack(final_fit)
 
-    output = {'Offsets': list(fooof_features_output['Offsets']), 'Slopes':list(fooof_features_output['Slopes'])}
+    output = {'Offsets': list(fooof_features_output['Offsets']), 'Slopes':list(fooof_features_output['Slopes']),'EOF': list(fooof_features_output['EOF']), 'GOF':list(fooof_features_output['GOF'])}
     return output

@@ -8,7 +8,8 @@ import os
 # internal modules
 
 import json
-f = open('./config_fooof.json') 
+##-----UPDATE---------#
+f = open('./config_bp.json') # change to config_fooof.json to merge fooof outputs
 config = json.load(f) 
 RAW_INFO_DIR = config['RAW_INFO_DIR'] 
 IN_RAW_DIR = config['IN_RAW_DIR'] 

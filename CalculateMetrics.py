@@ -69,7 +69,7 @@ def process_file(subject,mat_file, out_path, bad_ch_path, fs):
 # ------------ UPDATE THIS LINE --------------------- #
 
 if __name__ == '__main__':
-    subject_list = [ 's002', 's003']
+    subject_list = ['s001', 's002', 's003']
     
     for subject in subject_list:
         print(subject)

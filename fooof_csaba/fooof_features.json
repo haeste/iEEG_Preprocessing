@@ -5,6 +5,12 @@
     "freq_range":[30, 45],
     "peak_width_limits":[1, 8],
     "peak_threshold": 2.0, 
-    "aperiodic_mode": "fixed"
+    "aperiodic_mode": "fixed",
+    "notch_freq":60,
+    "z_threshold":3,
+    "butter_cutoff":[0.5, 80],
+    "butter_order": 2,
+    "overlap": 0,
+    "winLength": 2
         }
    

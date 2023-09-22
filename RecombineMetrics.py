@@ -9,7 +9,7 @@ import os
 
 import json
 ##-----UPDATE---------#
-f = open('./config_bp.json') # change to config_fooof.json to merge fooof outputs
+f = open('./config_fooof.json') # change to config_fooof.json to merge fooof outputs
 config = json.load(f) 
 RAW_INFO_DIR = config['RAW_INFO_DIR'] 
 IN_RAW_DIR = config['IN_RAW_DIR'] 
@@ -20,7 +20,7 @@ OUTPUT_CONCAT_DIR = config['OUTPUT_CONCAT_DIR']
 
 DATA_TEMP_DIR= './temp_data/'
 
-subject_list = ['s001', 's002', 's003']
+subject_list = ['s001','s002','s003', 's004', 's005']
 
 
 for subject in subject_list:

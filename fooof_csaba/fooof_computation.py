@@ -53,7 +53,7 @@ def run_fooof_calc(EEG,fs,fooof_features):
     else:
         downsampled_data, srate_new, winlength_new, nOverlap_new = fooof_helper.fooof_clean_prep(fooof_features,EEG,fs)
         f, Pxx_den = scipy.signal.welch(downsampled_data, fs=srate_new, nperseg=winlength_new,
-                                noverlap=nOverlap_new, detrend=False)
+                                noverlap=nOverlap_new, detrend=False,average='median')
         
         for i in range(Pxx_den.shape[0]):
             

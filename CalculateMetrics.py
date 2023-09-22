@@ -18,7 +18,7 @@ from fooof_csaba import fooof_computation
 
 import json
 ##-----UPDATE---------#
-f = open('./config_bp.json')  # change to config_fooof.json to merge fooof outputs
+f = open('./config_fooof.json')  # change to config_fooof.json to merge fooof outputs
 config = json.load(f) 
 RAW_INFO_DIR = config['RAW_INFO_DIR'] 
 IN_RAW_DIR = config['IN_RAW_DIR'] 
@@ -66,7 +66,7 @@ def process_file(subject,mat_file, out_path, bad_ch_path, fs):
 # ------------ UPDATE THIS LINE --------------------- #
 
 if __name__ == '__main__':
-    subject_list = ['s001', 's002', 's003']
+    subject_list = ['s001','s002','s003', 's004', 's005']
 
     
     for subject in subject_list:

@@ -71,7 +71,7 @@ def run_fooof_calc(EEG,fs,fooof_features):
         fooof_features_output['GOF']=Goodness_of_fit
         fooof_features_output['EOF']=Error_of_fit
         ## Concatonate final fit channels
-        final_fit=np.vstack(final_fit)
+        #final_fit=np.vstack(final_fit)
 
     output = {'Offsets': list(fooof_features_output['Offsets']), 'Slopes':list(fooof_features_output['Slopes']),'EOF': list(fooof_features_output['EOF']), 'GOF':list(fooof_features_output['GOF'])}
     return output

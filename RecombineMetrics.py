@@ -20,13 +20,13 @@ OUTPUT_CONCAT_DIR = config['OUTPUT_CONCAT_DIR']
 
 DATA_TEMP_DIR= './temp_data/'
 
-subject_list = ['s001','s002','s003', 's004', 's005']
-
+subject_list = os.listdir(OUTPUT_DIR)
+subject_list = ['1038']
 
 for subject in subject_list:
     print(subject)
     raw_info_path = os.path.join(RAW_INFO_DIR)
-    raw_info = sio.loadmat(os.path.join(raw_info_path, "rawInfo_{}.mat".format(subject)))
+    raw_info = sio.loadmat(os.path.join(raw_info_path, subject, "rawInfo_{}.mat".format(subject)))
 
     # The channels to keep; these are the ones that are included in the list and in at least one edf file.
     # The final channels included in the raw data
@@ -57,14 +57,25 @@ for subject in subject_list:
                                       shape=(len(channelsKeep), n_files))
 
     idx = 0
+    
+    print(sorted_metric_files[0])
+    import re
+    previous = -1
     for ff in sorted_metric_files:
-        
+        result = re.findall(r"(\d+)\.", ff)
+        result = int(result[0])
+        if  result- previous > 1:
+            print(previous)
+            print(result)
+        previous = result
+            
         metric_computed = sio.loadmat(os.path.join(metric_path, ff))
         for m in metrics:
             target_data[m][:, idx:idx+1] = metric_computed[m].reshape((len(channelsKeep), 1)) 
 
         idx += 1
-
+    print(sorted_metric_files[-1])
+    print('processed ' + str(len(sorted_metric_files)) + ' files')
     for m in metrics:
         target_data[m].flush()
 

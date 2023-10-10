@@ -43,7 +43,7 @@ def bandpower_process(EEGdata, fs, badch_indx):
     quality_factor = 35
     NaNthreshold = 0
 
-    print("Computing band power for this segment of data")
+    #print("Computing band power for this segment of data")
     list_all = EEG_Python_Welch_allChannels_abnormalities(EEGdata, badch_indx, fs, frange_bands,
                                             winLength, butter_cutoff, butter_order, overlap, notch,
                                             notch_freq, quality_factor, NaNthreshold)

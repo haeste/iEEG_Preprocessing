@@ -25,6 +25,8 @@ IN_RAW_DIR = config['IN_RAW_DIR']
 OUTPUT_DIR = config['OUTPUT_DIR'] 
 BAD_CHANNELS_DIR = config['BAD_CHANNELS_DIR'] 
 OUT_PREFIX = config['OUT_PREFIX']
+OUTPUT_CONCAT_DIR = config['OUTPUT_CONCAT_DIR']
+DATA_TEMP_DIR= './temp_data/'
 
 # Go and read the raw data
 def process_file(subject,mat_file, out_path, bad_ch_path, fs):
@@ -54,7 +56,7 @@ def process_file(subject,mat_file, out_path, bad_ch_path, fs):
     fooof_features = json.load(features) 
     
     metric_computed = fooof_computation.run_fooof_calc(iEEGraw_data, fs, fooof_features)
-    print("Processing:{}".format(mat_file))
+    #print("Processing:{}".format(mat_file))
     # Save band power for the 30s segment
     idd = str(os.path.basename(mat_file).split("raw_")[1].split(".mat")[0])
     sio.savemat(os.path.join(out_path, OUT_PREFIX+"{}_{}.mat".format(subject, idd)), metric_computed, do_compression = True)
@@ -66,13 +68,13 @@ def process_file(subject,mat_file, out_path, bad_ch_path, fs):
 # ------------ UPDATE THIS LINE --------------------- #
 
 if __name__ == '__main__':
-    subject_list = ['s001','s002','s003', 's004', 's005']
-
-    
+    #subject_list = ['s001','s002','s003', 's004', 's005']
+    subject_list = os.listdir(IN_RAW_DIR)
+    subject_list = ['1038']
     for subject in subject_list:
         print(subject)
         
-        raw_info = sio.loadmat(os.path.join(RAW_INFO_DIR, "rawInfo_{}.mat".format(subject)))
+        raw_info = sio.loadmat(os.path.join(RAW_INFO_DIR, subject,"rawInfo_{}.mat".format(subject)))
         
         # The channels to keep; these are the ones that are included in the list and in at least one edf file.
         # The final channels included in the raw data
@@ -99,18 +101,80 @@ if __name__ == '__main__':
         # for file in raw_files:
         #     process_file(subject, os.path.join(IN_RAW_DIR,subject,file), out_path,badCh_path, fs)
    
-        pool = multiprocessing.Pool(8)
+        pool = multiprocessing.Pool()
         start = time.time()
-    
+        results = []
         for file in raw_files:
-            pool.apply_async(process_file, [subject,os.path.join(IN_RAW_DIR,subject,file), out_path,badCh_path, fs])
-    
+            result = pool.apply_async(process_file, [subject,os.path.join(IN_RAW_DIR,subject,file), out_path,badCh_path, fs])
+            results.append(result)
+                    
         pool.close()
         pool.join()
-    
+        ready = [result.ready() for result in results]
+        successful = [result.successful() for result in results]
+        
+        if all(ready) and all(successful):
+            print('All files successfully processed.')
         print("\n job done!!: {}".format(time.time()-start))
+        
+        raw_info_path = os.path.join(RAW_INFO_DIR)
+        raw_info = sio.loadmat(os.path.join(raw_info_path, subject, "rawInfo_{}.mat".format(subject)))
+
+        # The channels to keep; these are the ones that are included in the list and in at least one edf file.
+        # The final channels included in the raw data
+        channelsKeep = list(raw_info["channelsKeep"])
+
+        # The final fs
+        fs = 200
+
+        metric_path = os.path.join(OUTPUT_DIR, subject)
+
+        metric_files = os.listdir(metric_path)
+        sorted_metric_files = sorted(metric_files, key = lambda x: int(x.split(OUT_PREFIX)[1].split(".mat")[0].split("_")[1]))
+
+        n_files = len(metric_files)
+        # n_files = len(t_start)
+        
+        path_memmap = os.path.join(DATA_TEMP_DIR, subject)
+        os.makedirs(path_memmap, exist_ok=True)
+        
+        metric_computed = sio.loadmat(os.path.join(metric_path, sorted_metric_files[0]))
+        metrics = list(metric_computed.keys())
+        metrics = [m for m in metrics if not m.startswith('__')]
+        target_data = {}
+        for m in metrics:
+            target_data[m] = np.memmap(os.path.join(path_memmap, m+"{}.buffer".format(subject)), mode='w+',
+                                          dtype=np.float32,
+                                          # dtype=np.double,
+                                          shape=(len(channelsKeep), n_files))
+
+        idx = 0
+        for ff in sorted_metric_files:
+            
+            metric_computed = sio.loadmat(os.path.join(metric_path, ff))
+            for m in metrics:
+                target_data[m][:, idx:idx+1] = metric_computed[m].reshape((len(channelsKeep), 1)) 
+
+            idx += 1
+
+        for m in metrics:
+            target_data[m].flush()
+
+        super_dict_ch = target_data
+        super_dict_ch['channels'] = channelsKeep
+        super_dict_ch['subject'] = subject
+        metric_concat_path = os.path.join(OUTPUT_CONCAT_DIR, subject)
+        os.makedirs(metric_concat_path, exist_ok=True)
+
+        sio.savemat(os.path.join(metric_concat_path, OUT_PREFIX+"{}.mat".format(subject)), super_dict_ch)
 
 
+        # Remove temporary files
+        for m in metrics:
+            os.remove(os.path.join(path_memmap, m+"{}.buffer".format(subject)))
+
+        # for ff in sorted_metric_files:
+        #     os.remove(os.path.join(metric_path, ff))
 
 
 
